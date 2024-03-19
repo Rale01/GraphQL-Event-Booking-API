@@ -2,10 +2,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
+const mongoose = require('mongoose');
+const Event = require('./models/event')
+
+
+require('dotenv').config();
+
 
 const app = express();
-
-const events = [];
 
 app.use(bodyParser.json());
 
@@ -41,19 +45,31 @@ const schema = buildSchema(`
 
 const rootValue = {
     events: () => {
-        return events;
+        return Event.find()
+            .then(events => {
+                return events.map(event => {
+                    return { ...event._doc, _id: event.id };
+                });
+            })
+            .catch(err => {
+                throw err;
+            });
     },
 
     createEvent: (args) => {
-        const event = {
-            _id: Math.random().toString(),
+        const event = new Event({
             title: args.eventInput.title,
             description: args.eventInput.description,
             price: +args.eventInput.price,
-            date: args.eventInput.date
-        }
-        events.push(event);
-        return event;
+            date: new Date(args.eventInput.date)
+        })
+        return event.save().then(result => {
+            console.log(result);
+            return {...result._doc, _id: event._doc._id.toString() };
+        }).catch(err =>{
+            console.log(err);
+            throw err;
+        });
     }
 };
 
@@ -68,6 +84,15 @@ app.get('/', (req, res) => {
     res.redirect('/graphql?query={}');
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port http://localhost:3000');
+mongoose.
+mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@eventbookingapicluster.dyeksib.mongodb.net/${process.env.MONGO_DB}`)
+.then(() => {
+    app.listen(3000, () => {
+        console.log('Server is running on port http://localhost:3000');
+        console.log(`MongoDB successfully connected to the database called ${process.env.MONGO_DB}`);
+    });
+}).catch(err => {
+    console.log(err);
 });
+
+
