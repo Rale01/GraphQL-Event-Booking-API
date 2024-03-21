@@ -12,7 +12,7 @@ const events = eventIds => {
                     ...event._doc,
                      _id: event.id,
                      date: new Date(event._doc.date).toISOString(),
-                    creator: user.bind(this, event.creator) };
+                    creator: user(event.creator) };
             })
         }
     )
@@ -27,7 +27,7 @@ const user = userId => {
         return { 
             ...user._doc,
             _id: user.id,
-            createdEvents: events.bind(this, user._doc.createdEvents) 
+            createdEvents: events(user._doc.createdEvents) 
         };
     })
     .catch(err => {
@@ -35,19 +35,19 @@ const user = userId => {
     })
 }
 
-const singleEvent = async eventId => {
-    try {
-        const event = await Event.findById(eventId);
+const singleEvent = eventId => {
+    return Event.findById(eventId)
+    .then(event => {
         return {
             ...event._doc,
             _id: event.id, 
-            creator: user.bind(this, event.creator)
+            creator: user(event.creator)
         };
-    } catch (err) {
+    })
+    .catch(err => {
         throw err;
-    }
+    })
 }
-
 
 module.exports = {
     events: () => {
@@ -58,7 +58,7 @@ module.exports = {
                         ...event._doc, 
                         _id: event.id,
                         date: new Date(event._doc.date).toISOString(),
-                        creator: user.bind(this, event._doc.creator)
+                        creator: user(event._doc.creator)
                     };
                 });
             })
@@ -67,26 +67,25 @@ module.exports = {
             });
     },
 
-
-    bookings: async () => {
-        try{
-            const bookings = await Booking.find();
-            return bookings.map(booking => {
-                return { 
-                    ...booking._doc,
-                    _id: booking.id,
-                    user: user.bind(this, booking._doc.user),
-                    event: singleEvent.bind(this, booking._doc.event),
-                    createdAt: new Date(booking._doc.createdAt).toISOString(),
-                    updatedAt: new Date(booking._doc.updatedAt).toISOString(),
-                    
-                };
+    bookings: () => {
+        return Booking.find()
+            .then(bookings => {
+                return bookings.map(booking => {
+                    return { 
+                        ...booking._doc,
+                        _id: booking.id,
+                        user: user(booking._doc.user),
+                        event: singleEvent(booking._doc.event),
+                        createdAt: new Date(booking._doc.createdAt).toISOString(),
+                        updatedAt: new Date(booking._doc.updatedAt).toISOString(),
+                    };
+                });
+            })
+            .catch(err => {
+                throw err;
             });
-        }catch(err){
-            throw err;
-        }
     },
- 
+
     createEvent: (args) => {
         const event = new Event({
             title: args.eventInput.title,
@@ -103,7 +102,7 @@ module.exports = {
                 ...result._doc,
                 _id: event._doc._id.toString(), 
                 date: new Date(event._doc.date).toISOString(),
-                creator: user.bind(this, result._doc.creator) 
+                creator: user(result._doc.creator) 
             }
             return User.findById('65fb1bb2520d4774afd83531')
         })
@@ -148,51 +147,53 @@ module.exports = {
 
     },
 
-    bookEvent: async ({ eventId }) => {
-        const fetchedEvent = await Event.findOne({_id: eventId});
-        const booking = new Booking({
-            user: '65fb1bb2520d4774afd83531',
-            event: fetchedEvent
+    bookEvent: ({ eventId }) => {
+        return Event.findOne({_id: eventId})
+        .then(fetchedEvent => {
+            const booking = new Booking({
+                user: '65fb1bb2520d4774afd83531',
+                event: fetchedEvent
+            });
+            return booking.save();
+        })
+        .then(result => {
+            return { 
+                ...result._doc,
+                _id: result.id, 
+                user: user(result._doc.user),
+                event: singleEvent(result._doc.event),
+                createdAt: new Date(result._doc.createdAt).toISOString(),
+                updatedAt: new Date(result._doc.updatedAt).toISOString(),
+            };
         });
-        const result = await booking.save();
-        return { 
-            ...result._doc,
-            _id: result.id, 
-            user: user.bind(this, booking._doc.user),
-            event: singleEvent.bind(this, booking._doc.event),
-            createdAt: new Date(result._doc.createdAt).toISOString(),
-            updatedAt: new Date(result._doc.updatedAt).toISOString(),
-        };
     },
-    cancelBooking: async ({ bookingId }) => {
-        try {
-            const booking = await Booking.findById(bookingId).populate('event');
+    cancelBooking: ({ bookingId }) => {
+        return Booking.findById(bookingId).populate('event')
+        .then(booking => {
             if (!booking) {
                 throw new Error('Booking not found.');
             }
             if (!booking.event) {
                 throw new Error('Event not found for the booking.');
             }
-    
-            const creator = await User.findById(booking.event.creator);
-            if (!creator) {
-                throw new Error('Creator not found for the booking.');
-            }
-    
-            const event = {
-                ...booking.event.toObject(),
-                _id: booking.event._id,
-                creator: creator
-            };
-    
-            await Booking.deleteOne({ _id: bookingId });
-            return event;
-        } catch (err) {
+
+            return User.findById(booking.event.creator)
+            .then(creator => {
+                if (!creator) {
+                    throw new Error('Creator not found for the booking.');
+                }
+
+                const event = {
+                    ...booking.event.toObject(),
+                    _id: booking.event._id,
+                    creator: creator
+                };
+
+                return Booking.deleteOne({ _id: bookingId }).then(() => event);
+            });
+        })
+        .catch(err => {
             throw err;
-        }
+        });
     }
-    
-    
-    
-    
-}
+};
