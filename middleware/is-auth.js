@@ -1,32 +1,53 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
-    const authHeader = req.get('Authorization');
-    if(!authHeader){
-        req.isAuth = false;
-        return next();
-    }
-    const token = authHeader.split(' ')[1]; // jer token izgleda kao "Bearer djdeockkskks"
-    if(!token || token === ''){
+module.exports = async (req, res, next) => {
+    const accessToken = req.get('AuthorizationWithAccessToken');
+    const refreshToken = req.get('AuthorizationWithRefreshToken');
+    if (!accessToken && !refreshToken) {
         req.isAuth = false;
         return next();
     }
 
-    let decodedToken;
+    let decodedAccessToken;
+    let decodedRefreshToken;
     try {
-       decodedToken = jwt.verify(token, 'somesupersecretkey');
+        if (accessToken) {
+            decodedAccessToken = jwt.verify(accessToken, 'somesupersecretkey');
+        }
+        if (refreshToken) {
+            decodedRefreshToken = jwt.verify(refreshToken, 'refreshsupersecretkey');
+        }
+        // Generate new access token if refresh token is valid
+        if (!decodedAccessToken && decodedRefreshToken) {
+            const newAccessToken = jwt.sign(
+                { userId: decodedRefreshToken.userId, email: decodedRefreshToken.email },
+                'somesupersecretkey',
+                { expiresIn: '1h' }
+            );
+            res.set('AuthorizationWithAccessToken', newAccessToken);
+        }
     } catch (err) {
-        req.isAuth = false;
-        return next();
-    }
-
-    if(!decodedToken){
-        req.isAuth = false;
-        return next();
+        if (!decodedAccessToken && !decodedRefreshToken) {
+            // Both tokens are invalid
+            req.isAuth = false;
+            return next();
+        } else if (!decodedAccessToken) {
+            // Access token is invalid
+            req.isAuth = 'Unvalid';
+            req.userId = decodedRefreshToken.userId;
+            return next();
+        } else {
+            // Refresh token is invalid
+            req.isAuth = false;
+            return next();
+        }
     }
 
     req.isAuth = true;
-    req.userId = decodedToken.userId;
+    req.userId = decodedAccessToken.userId;
     next();
+};
 
-}
+
+
+
