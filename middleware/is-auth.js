@@ -1,9 +1,16 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = async (req, res, next) => {
+const blacklistedTokens = new Set();
+
+async function isAuth(req, res, next) {
     const accessToken = req.get('AuthorizationWithAccessToken');
     const refreshToken = req.get('AuthorizationWithRefreshToken');
     if (!accessToken && !refreshToken) {
+        req.isAuth = false;
+        return next();
+    }
+
+    if (blacklistedTokens.has(accessToken) && blacklistedTokens.has(refreshToken)) {
         req.isAuth = false;
         return next();
     }
@@ -46,8 +53,12 @@ module.exports = async (req, res, next) => {
     req.isAuth = true;
     req.userId = decodedAccessToken.userId;
     next();
-};
+}
 
+module.exports = {
+    blacklistedTokens,
+    isAuth,
+};
 
 
 

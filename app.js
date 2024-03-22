@@ -6,10 +6,9 @@ const mongoose = require('mongoose');
 const graphqlSchema = require('./graphql/schema/index');
 const graphqlResolvers = require('./graphql/resolvers/index');
 
-const isAuth = require('./middleware/is-auth');
+const isAuth = require('./middleware/is-auth').isAuth;
 
 require('dotenv').config();
-
 
 const app = express();
 
@@ -24,7 +23,7 @@ app.use('/graphql', graphqlHTTP({
 }));
 
 // Default route to open GraphQL playground without a query
-app.get('/', (req, res) => {
+app.get('/', ( res ) => {
     res.redirect('/graphql?query={}');
 });
 

@@ -2,6 +2,8 @@ const User = require('../../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const { blacklistedTokens } = require('../../middleware/is-auth');
+
 
 module.exports = {
 
@@ -44,6 +46,29 @@ module.exports = {
             'refreshsupersecretkey',
             { expiresIn: '7d' }
         );
+
         return { userId: user.id, accessToken: accessToken, refreshToken: refreshToken, accessTokenExpiration: 1, refreshTokenExpiration: 7 };
-    }
+    },
+
+    logout: async (_, { headers }) => {
+        const accessToken = headers.authorizationwithaccesstoken;
+        const refreshToken = headers.authorizationwithrefreshtoken;
+        
+        if (accessToken) {
+            blacklistedTokens.add(accessToken);
+        }
+        if (refreshToken) {
+            blacklistedTokens.add(refreshToken);
+        }
+        
+        console.log(blacklistedTokens);
+        return 'Logout successful';
+    },
+    
+    
+    
+    
+    
+    
+
 };
