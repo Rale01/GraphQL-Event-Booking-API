@@ -17,7 +17,11 @@ const userSchema = new Schema({
             ref: 'Event',
             required: true
         }
-    ]
+    ],
+    isManager: {
+        type: Boolean,
+        default: false 
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);

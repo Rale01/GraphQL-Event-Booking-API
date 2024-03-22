@@ -23,6 +23,7 @@ module.exports = buildSchema(`
         email: String!
         password: String
         createdEvents: [Event!]
+        isManager: Boolean!
     }
 
     type AuthData {
@@ -31,6 +32,7 @@ module.exports = buildSchema(`
         refreshToken: String!
         accessTokenExpiration: Int!
         refreshTokenExpiration: Int!
+        isManager: Boolean!
     }
 
     input EventInput {
@@ -43,6 +45,7 @@ module.exports = buildSchema(`
     input UserInput {
         email: String!
         password: String!
+        isManager: Boolean
     }
 
     type RootQuery {

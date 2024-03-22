@@ -40,14 +40,16 @@ const transformEvent = async (event) => ({
     creator: await user(event.creator),
 });
 
-const transformBooking = async (booking) => ({
-    ...booking._doc,
-    _id: booking.id,
-    user: await user(booking._doc.user),
-    event: await singleEvent(booking._doc.event),
-    createdAt: dateToString(booking._doc.createdAt),
-    updatedAt: dateToString(booking._doc.updatedAt),
-});
+const transformBooking = booking => {
+    return {
+      ...booking._doc,
+      _id: booking.id,
+      user: user.bind(this, booking._doc.user),
+      event: singleEvent.bind(this, booking._doc.event),
+      createdAt: dateToString(booking._doc.createdAt),
+      updatedAt: dateToString(booking._doc.updatedAt)
+    };
+  };
 
 exports.user = user;
 exports.events = events;

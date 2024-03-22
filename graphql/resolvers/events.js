@@ -2,9 +2,15 @@ const Event = require('../../models/event');
 const User = require('../../models/user');
 const { transformEvent } = require('./merge');
 
+const authResolver = require('../resolvers/auth');
+
+let isManager = authResolver.isManager;
 
 module.exports = {
     events: async () => {
+        if(!isManager){
+            throw new Error('Unauthorized!');
+          }
         try {
             const eventsList = await Event.find();
             return eventsList.map(transformEvent);
@@ -15,6 +21,9 @@ module.exports = {
     
 
     createEvent: async (args, req) => {
+        if(!isManager){
+            throw new Error('Unauthorized!');
+          }
         try {
             if(!req.isAuth){
                 throw new Error('Unauthenticated!');

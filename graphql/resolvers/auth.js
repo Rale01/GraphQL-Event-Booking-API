@@ -4,28 +4,27 @@ const jwt = require('jsonwebtoken');
 
 const { blacklistedTokens } = require('../../middleware/is-auth');
 
+let isManager = false;
 
 module.exports = {
-
-    createUser: async (args) => {
-        try {
-            const existingUser = await User.findOne({ email: args.userInput.email });
+        createUser: async ({ userInput }) => {
+            const { email, password, isManager } = userInput;
+            const existingUser = await User.findOne({ email });
             if (existingUser) {
                 throw new Error('User exists already.');
             }
-
-            const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
+        
+            const hashedPassword = await bcrypt.hash(password, 12);
             const user = new User({
-                email: args.userInput.email,
+                email,
                 password: hashedPassword,
+                isManager: isManager || false, // Set default value if not provided
             });
             const result = await user.save();
-
+        
             return { ...result._doc, _id: result.id, password: null };
-        } catch (err) {
-            throw err;
-        }
-    },
+        },
+    
 
     login: async ({ email, password }) => {
         const user = await User.findOne({ email: email });
@@ -47,7 +46,16 @@ module.exports = {
             { expiresIn: '7d' }
         );
 
-        return { userId: user.id, accessToken: accessToken, refreshToken: refreshToken, accessTokenExpiration: 1, refreshTokenExpiration: 7 };
+        isManager = user.isManager;
+
+        return { 
+            userId: user.id,
+            accessToken: accessToken, 
+            refreshToken: refreshToken, 
+            accessTokenExpiration: 1, 
+            refreshTokenExpiration: 7 , 
+            isManager: user.isManager
+        };
     },
 
     logout: async (_, { headers }) => {
@@ -66,9 +74,6 @@ module.exports = {
     },
     
     
-    
-    
-    
-    
+    isManager: () => isManager,
 
 };
