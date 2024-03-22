@@ -1,4 +1,5 @@
 const Event = require('../../models/event');
+const User = require('../../models/user');
 const { transformEvent } = require('./merge');
 
 
@@ -13,21 +14,25 @@ module.exports = {
     },
     
 
-    createEvent: async (args) => {
+    createEvent: async (args, req) => {
         try {
+            if(!req.isAuth){
+                throw new Error('Unauthenticated!');
+            }
+
             const event = new Event({
                 title: args.eventInput.title,
                 description: args.eventInput.description,
                 price: +args.eventInput.price,
                 date: new Date(args.eventInput.date),
-                creator: '65fb1bb2520d4774afd83531',
+                creator: req.userId,
             });
 
             const result = await Event.insertMany([event]); // Use insertMany for batch operation
 
             const createdEvent = transformEvent(result[0]); // Get the first inserted event
 
-            const user = await User.findById('65fb1bb2520d4774afd83531');
+            const user = await User.findById(req.userId);
             if (!user) {
                 throw new Error('User not found.');
             }

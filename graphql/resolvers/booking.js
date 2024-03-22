@@ -8,8 +8,11 @@ const { transformBooking } = require('./merge')
 
 module.exports = {
 
-    bookings: async () => {
+    bookings: async (req) => {
         try {
+            if(!req.isAuth){
+                throw new Error('Unauthenticated!');
+            }
             const bookings = await Booking.find();
             return bookings.map(async (booking) => {
                 const transformedBooking = await transformBooking(booking);
@@ -24,27 +27,30 @@ module.exports = {
         }
     },
 
-    bookEvent: async ({ eventId }) => {
+    bookEvent: async ({ eventId }, req) => {
         try {
+            if(!req.isAuth){
+                throw new Error('Unauthenticated!');
+            }
             const fetchedEvent = await Event.findById(eventId);
             if (!fetchedEvent) {
                 throw new Error('Event not found.');
             }
     
             const booking = new Booking({
-                user: '65fb1bb2520d4774afd83531',
+                user: req.userId,
                 event: fetchedEvent,
             });
             const result = await booking.save();
     
-            const user = await User.findById('65fb1bb2520d4774afd83531');
+            const user = await User.findById(req.userId);
             if (!user) {
                 throw new Error('User not found.');
             }
     
             // Update the user's createdEvents array atomically
             await User.findOneAndUpdate(
-                { _id: '65fb1bb2520d4774afd83531' },
+                { _id: req.userId },
                 { $push: { createdEvents: fetchedEvent } }
             );
     
@@ -67,8 +73,11 @@ module.exports = {
     
     
 
-    cancelBooking: async ({ bookingId }) => {
+    cancelBooking: async ({ bookingId }, req) => {
         try {
+            if(!req.isAuth){
+                throw new Error('Unauthenticated!');
+            }
             const booking = await Booking.findById(bookingId).populate('event');
             if (!booking) {
                 throw new Error('Booking not found.');
