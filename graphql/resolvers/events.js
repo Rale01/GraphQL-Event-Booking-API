@@ -54,5 +54,54 @@ module.exports = {
             throw err;
         }
     },
+
+    updateEvent: async ({ eventId, eventInput }, req) => {
+        if (!isManager) {
+            throw new Error('Unauthorized!');
+        }
+        try {
+            if (!req.isAuth) {
+                throw new Error('Unauthenticated!');
+            }
+
+            const event = await Event.findById(eventId);
+            if (!event) {
+                throw new Error('Event not found.');
+            }
+
+            event.title = eventInput.title;
+            event.description = eventInput.description;
+            event.price = +eventInput.price;
+            event.date = new Date(eventInput.date);
+
+            const updatedEvent = await event.save();
+            return transformEvent(updatedEvent);
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    },
+
+    deleteEvent: async ({ eventId }, req) => {
+        if (!isManager) {
+            throw new Error('Unauthorized!');
+        }
+        try {
+            if (!req.isAuth) {
+                throw new Error('Unauthenticated!');
+            }
+
+            const event = await Event.findById(eventId);
+            if (!event) {
+                throw new Error('Event not found.');
+            }
+
+            await Event.deleteOne({ _id: eventId });
+            return "Event successfully deleted!";
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    },
 };
 
