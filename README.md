@@ -8,7 +8,7 @@ Ovaj GraphQL API je napravljen koristeći tehnologije MongoDB, Node.js i GraphQL
 - **GraphQL** se koristi kao upitni jezik za pristup podacima i definisanje strukture API-ja.
 
 ## Modeli
-![GraphQL Event Booking API](https://i.postimg.cc/02n62pMp/Graph-QL-Event-Booking-API-PMOV.png)
+![GraphQL Event Booking API](https://i.postimg.cc/JhbXL08X/Graph-QL-Event-Booking-API-PMOV.png)
 
 API ima tri osnovna modela:
 
