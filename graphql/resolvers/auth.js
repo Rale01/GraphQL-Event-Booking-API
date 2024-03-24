@@ -18,7 +18,7 @@ module.exports = {
             const user = new User({
                 email,
                 password: hashedPassword,
-                isManager: isManager || false, // Set default value if not provided
+                isManager: isManager || false, 
             });
             const result = await user.save();
         
@@ -58,7 +58,7 @@ module.exports = {
         };
     },
 
-    logout: async (_, { headers }) => {
+    logout: async ({ headers }) => {
         const accessToken = headers.authorizationwithaccesstoken;
         const refreshToken = headers.authorizationwithrefreshtoken;
         

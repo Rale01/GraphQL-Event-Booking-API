@@ -24,27 +24,27 @@ async function isAuth(req, res, next) {
         if (refreshToken) {
             decodedRefreshToken = jwt.verify(refreshToken, 'refreshsupersecretkey');
         }
-        // Generate new access token if refresh token is valid
+
         if (!decodedAccessToken && decodedRefreshToken) {
             const newAccessToken = jwt.sign(
                 { userId: decodedRefreshToken.userId, email: decodedRefreshToken.email },
                 'somesupersecretkey',
                 { expiresIn: '1h' }
             );
-            res.set('AuthorizationWithAccessToken', newAccessToken);
+            decodedAccessToken = jwt.verify(newAccessToken, 'somesupersecretkey');
         }
     } catch (err) {
         if (!decodedAccessToken && !decodedRefreshToken) {
-            // Both tokens are invalid
+
             req.isAuth = false;
             return next();
         } else if (!decodedAccessToken) {
-            // Access token is invalid
+
             req.isAuth = 'Unvalid';
             req.userId = decodedRefreshToken.userId;
             return next();
         } else {
-            // Refresh token is invalid
+
             req.isAuth = false;
             return next();
         }

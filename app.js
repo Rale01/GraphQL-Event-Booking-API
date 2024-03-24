@@ -22,12 +22,8 @@ app.use('/graphql', graphqlHTTP({
     graphiql: true // Enable GraphQL playground
 }));
 
-// Default route to open GraphQL playground without a query
-app.get('/', ( res ) => {
-    res.redirect('/graphql?query={}');
-});
 
-mongoose.
+
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@eventbookingapicluster.dyeksib.mongodb.net/${process.env.MONGO_DB}`)
 .then(() => {
     app.listen(3000, () => {

@@ -37,15 +37,15 @@ module.exports = {
                 creator: req.userId,
             });
 
-            const result = await Event.insertMany([event]); // Use insertMany for batch operation
+            const result = await Event.insertMany([event]); 
 
-            const createdEvent = transformEvent(result[0]); // Get the first inserted event
+            const createdEvent = transformEvent(result[0]); 
 
             const user = await User.findById(req.userId);
             if (!user) {
                 throw new Error('User not found.');
             }
-            user.createdEvents.push(result[0]); // Push the first inserted event
+            user.createdEvents.push(result[0]); 
             await user.save();
 
             return createdEvent;

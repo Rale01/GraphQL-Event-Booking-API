@@ -1,18 +1,18 @@
 const Event = require('../../models/event');
 const Booking = require('../../models/booking');
 const { transformBooking, transformEvent } = require('./merge');
-const { dateToString } = require('../../helpers/date');
+
 
 const authResolver = require('../resolvers/auth');
 
 let isManager = authResolver.isManager;
 
 module.exports = {
-  bookings: async (args, req) => {
+  bookings: async (req) => {
     if (!req.isAuth) {
       throw new Error('Unauthenticated!');
     }
-    if(isManager){
+    if(!isManager){
       throw new Error('Unauthorized!');
     }
     console.log(isManager);
@@ -37,8 +37,8 @@ module.exports = {
     const booking = new Booking({
       user: req.userId,
       event: fetchedEvent,
-      createdAt: dateToString(new Date()),
-      updateAt: dateToString(new Date()),
+      createdAt: new Date(),
+      updateAt: new Date(),
     });
     const result = await booking.save();
     return transformBooking(result);
