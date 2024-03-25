@@ -2,7 +2,7 @@ const User = require('../../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const { blacklistedTokens, setIsManager, getIsManager } = require('../../middleware/is-auth');
+const { blacklistedTokens} = require('../../middleware/is-auth');
 
 
 module.exports = {
