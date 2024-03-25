@@ -1,7 +1,0 @@
-{
-    "env": {
-        "MONGO_USER": "rale01",
-        "MONGO_PASS": "rale01",
-        "MONGO_DB": "event-booking"
-    }
-}
