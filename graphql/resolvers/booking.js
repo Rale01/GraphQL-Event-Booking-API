@@ -1,21 +1,27 @@
 const Event = require('../../models/event');
 const Booking = require('../../models/booking');
+const User = require('../../models/user');
 const { transformBooking, transformEvent } = require('./merge');
 
 
-const authResolver = require('../resolvers/auth');
 
-let isManager = authResolver.isManager;
+
+
 
 module.exports = {
-  bookings: async (req) => {
+  bookings: async (_, req ) => {
     if (!req.isAuth) {
       throw new Error('Unauthenticated!');
     }
+
+    const user = await User.findById(req.userId);
+    const isManager = user.isManager;
+
+
     if(!isManager){
       throw new Error('Unauthorized!');
     }
-    console.log(isManager);
+    
     try {
       const bookings = await Booking.find();
       return bookings.map(booking => {
@@ -30,9 +36,15 @@ module.exports = {
     if (!req.isAuth) {
       throw new Error('Unauthenticated!');
     }
+    
+    const user = await User.findById(req.userId);
+    const isManager = user.isManager;
+  
+
     if(isManager){
       throw new Error('Unauthorized!');
     }
+ 
     const fetchedEvent = await Event.findOne({ _id: args.eventId });
     const booking = new Booking({
       user: req.userId,
@@ -48,9 +60,15 @@ module.exports = {
     if (!req.isAuth) {
       throw new Error('Unauthenticated!');
     }
+
+    const user = await User.findById(req.userId);
+    const isManager = user.isManager;
+  
+
     if(isManager){
       throw new Error('Unauthorized!');
     }
+
     try {
 
       const booking = await Booking.findById(args.bookingId).populate('event');

@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 
+
 const blacklistedTokens = new Set();
+
+
 
 async function isAuth(req, res, next) {
     const accessToken = req.get('AuthorizationWithAccessToken');
@@ -53,9 +56,12 @@ async function isAuth(req, res, next) {
     req.isAuth = true;
     req.userId = decodedAccessToken.userId;
     next();
-}
+};
+
+
 
 module.exports = {
+
     blacklistedTokens,
     isAuth,
 };

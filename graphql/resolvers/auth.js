@@ -2,9 +2,8 @@ const User = require('../../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const { blacklistedTokens } = require('../../middleware/is-auth');
+const { blacklistedTokens, setIsManager, getIsManager } = require('../../middleware/is-auth');
 
-let isManager = false;
 
 module.exports = {
         createUser: async ({ userInput }) => {
@@ -46,7 +45,6 @@ module.exports = {
             { expiresIn: '7d' }
         );
 
-        isManager = user.isManager;
 
         return { 
             userId: user.id,
@@ -58,7 +56,7 @@ module.exports = {
         };
     },
 
-    logout: async ({ headers }) => {
+    logout: async (_, { headers }) => {
         const accessToken = headers.authorizationwithaccesstoken;
         const refreshToken = headers.authorizationwithrefreshtoken;
         
@@ -69,11 +67,7 @@ module.exports = {
             blacklistedTokens.add(refreshToken);
         }
         
-        console.log(blacklistedTokens);
         return 'Logout successful';
     },
-    
-    
-    isManager: () => isManager,
 
 };
