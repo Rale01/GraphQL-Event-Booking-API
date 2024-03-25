@@ -47,3 +47,4 @@ API podržava sledeće slučajeve korišćenja:
 - Pravljenje rezervacije
 - Otkazivanje rezervacije
 - Pregled svih rezervacija
+- Odjava korisnika/menadzera
