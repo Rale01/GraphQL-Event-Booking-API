@@ -118,7 +118,18 @@ module.exports = {
                 throw new Error('Event not found.');
             }
 
+            const user = await User.findById(event.creator);
+            if (!user) {
+                throw new Error('User not found.');
+            }
+
             await Event.deleteOne({ _id: eventId });
+
+
+            user.createdEvents.pull(eventId);
+            await user.save();
+
+
             return "Event successfully deleted!";
         } catch (err) {
             console.log(err);
