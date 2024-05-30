@@ -1,50 +1,42 @@
 # Event Booking GraphQL API
 ![GraphQL Event Booking API](https://i.postimg.cc/BvSRfPL7/GraphQl.png)
 
-Ovaj GraphQL API je napravljen koristeći tehnologije MongoDB, Node.js i GraphQL. Svaka od ovih tehnologija ima svoju ulogu u izgradnji API-ja:
+This GraphQL API is built using MongoDB, Node.js, and GraphQL technologies. Each of these technologies has its own role in constructing the API:
+- **MongoDB** is used as the database for storing data about events, users, and reservations.
+- **Node.js** combined with Express.js is used for the backend implementation of the API and for executing GraphQL queries.
+- **GraphQL** is used as the query language for accessing data and defining the structure of the API.
 
-- **MongoDB** se koristi kao baza podataka za skladištenje podataka o događajima, korisnicima i rezervacijama.
-- **Node.js** u kombinaciji sa **Express.js**-om se koristi za backend implementaciju API-ja i za izvršavanje GraphQL upita.
-- **GraphQL** se koristi kao upitni jezik za pristup podacima i definisanje strukture API-ja.
-
-## Modeli
+## Models
 ![GraphQL Event Booking API](https://i.postimg.cc/JhbXL08X/Graph-QL-Event-Booking-API-PMOV.png)
 
-API ima tri osnovna modela:
+The API has three primary models:
+1. **Event** - A model representing an individual event with attributes such as id, title, description, price, date, and creator (a reference to the User model, the id of the user who created the event).
+2. **User** - A model representing a user with attributes such as id, email, password, isManager (role, either a regular user or a manager), and createdEvents (a list of ids of all events).
+3. **Booking** - A model representing a user's booking for a specific event. It contains attributes such as id, event (a reference to the Event model), user (a reference to the User model), createdAt, and updatedAt.
 
-1. **Event (Događaj)** - Model koji predstavlja pojedinačni događaj sa atributima kao što su id, title(naslov), description(opis), price(cena), date(datum) i creator(referenca ka User modelu, id korisnika koji je kreirao dati dogadjaj).
+The cardinalities of the relationships between the models are as follows:
+- A User can create multiple Events, while an Event can be created by one and only one User.
+- A Booking can be created by one and only one User, while a User can create multiple Bookings.
+- A Booking can relate to one and only one Event, while an Event can be part of multiple Bookings.
 
-2. **User (Korisnik)** - Model koji predstavlja korisnika sa atributima kao što su id, email, password(lozinka), isManager(uloga, običan korisnik ili menadžer) i createdEvents(listu id-ijeva svih dogadjaja).
-
-3. **Booking (Rezervacija)** - Model koji predstavlja rezervaciju korisnika za određeni događaj. Sadrzi atribute id, event(referenca ka modelu Event), user(referenca ka modelu User), createdAt i updatedAt.
-
-Kardinalnosti veza izmedju modela jesu sledece:
-
-- **User** moze kreirati vise **Event**-ova, dok jedan **Event** moze biti kreiran od jednog i samo jednog **User**-a.
-- **Booking** moze biti kreiran od jednog i samo jednog **User**-a, dok jedan **User** moze kreirati vise **Booking**-a.
-- **Booking** se moze odnositi na jedan i samo jedan **Event**, dok jedan **Event** moze biti deo vise **Booking**-a.
-
-## Korisničke uloge
+## User roles
 ![GraphQL Event Booking API](https://i.postimg.cc/bYWP0r7K/Korisnicke-uloge.png)
 
-User model ima dve korisničke uloge:
+The User model has two user roles:
+- **Regular User** - Can make and cancel bookings.
+- **Manager** - Can perform CRUD operations on events and view all bookings.
 
-- **Običan korisnik** - Može praviti rezervacije i otkazivati ih.
-- **Menadžer** - Može izvršavati CRUD operacije nad događajima i pregledati sve rezervacije.
-
-## Slučajevi korišćenja
-
-API podržava sledeće slučajeve korišćenja:
-
-- Registracija korisnika
-- Registracija menadžera
-- Login korisnika
-- Login menadžera
-- Kreiranje događaja
-- Izmena događaja
-- Pregled svih događaja
-- Brisanje događaja
-- Pravljenje rezervacije
-- Otkazivanje rezervacije
-- Pregled svih rezervacija
-- Odjava korisnika/menadzera
+## Use Cases
+The API supports the following use cases:
+- User registration
+- Manager registration
+- User login
+- Manager login
+- Creating an event
+- Editing an event
+- Viewing all events
+- Deleting an event
+- Making a booking
+- Canceling a booking
+- Viewing all bookings
+- User/Manager logout
